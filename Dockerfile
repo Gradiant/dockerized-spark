@@ -2,7 +2,7 @@ FROM openjdk:8u171-jre-alpine3.8
 
 LABEL maintainer="cgiraldo@gradiant.org"
 LABEL organization="gradiant.org"
-ARG VERSION=2.3.0
+ARG VERSION=2.3.1
 ENV SPARK_VERSION=$VERSION
 
 RUN apk add --no-cache bash procps coreutils python2 && mkdir /opt && \
