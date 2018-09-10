@@ -48,7 +48,8 @@ If unset, Spark will find a valid port number, but with no guarantee of a predic
 Example of a spark standalone deployment with a spark master and three spark worker.
 
 
-```docker run -d -p 8080:8080 --name spark-master gradiant/spark master
+```
+docker run -d -p 8080:8080 --name spark-master gradiant/spark master
 docker run -d --link spark-master --name spark-worker1 gradiant/spark worker spark://spark-master:7077
 docker run -d --link spark-master --name spark-worker2 gradiant/spark worker spark://spark-master:7077
 docker run -d --link spark-master --name spark-worker3 gradiant/spark worker spark://spark-master:7077
