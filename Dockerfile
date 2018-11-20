@@ -5,7 +5,7 @@ LABEL organization="gradiant.org"
 ARG VERSION=2.3.0
 ENV SPARK_VERSION=$VERSION
 
-RUN apk add --no-cache bash procps coreutils python2 python3 && mkdir /opt && \
+RUN apk add --no-cache bash procps coreutils python2 python3 libc6-compat && mkdir /opt && \
 wget -qO- https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop2.7.tgz | tar xvz -C /opt && \
 ln -s /opt/spark-$SPARK_VERSION-bin-hadoop2.7 /opt/spark
 # ADDING SPARKR SUPPORT
