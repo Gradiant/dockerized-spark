@@ -6,7 +6,7 @@ LABEL organization="gradiant.org"
 ARG hadoop_version=2.7.7
 ENV HADOOP_VERSION=$hadoop_version
 
-RUN apk add --no-cache bash build-base maven autoconf automake libtool cmake zlib-dev libressl-dev fts-dev  libtirpc-dev && mkdir /opt
+RUN apk add --no-cache bash  build-base maven autoconf automake libtool cmake zlib-dev libressl-dev fts-dev  libtirpc-dev && mkdir /opt
 # Building Protobuf 2.5.0
 RUN cd /opt && wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz && \
   tar xvf protobuf-2.5.0.tar.gz && cd protobuf-2.5.0 && ./autogen.sh && ./configure --prefix=/usr && \
@@ -42,40 +42,50 @@ FROM openjdk:8u171-jre-alpine3.8
 ARG version
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
 LABEL organization="gradiant.org"
-ENV SPARK_VERSION=$version
-ENV SPARK_HOME=/opt/spark
-ENV PATH=$PATH:$SPARK_HOME/sbin:$SPARK_HOME/bin
-ENV SPARK_NO_DAEMONIZE=true
+ENV SPARK_VERSION=$version \
+    SPARK_HOME=/opt/spark \
+    SPARK_NO_DAEMONIZE=true
+ENV PATH=$PATH:$SPARK_HOME/sbin:$SPARK_HOME/bin \
+    SPARK_LOCAL_DIRS=$SPARK_HOME/work-dir \
+    SPARK_WORKER_DIR=$SPARK_HOME/worker
+# You may improve spark access to fs if SPARK_LOCAL_DIRS and SPARK_WORKER_DIR are mounted as volumes
 
 COPY --from=hadoop-builder /opt/hadoop-native/* /lib/
 
-RUN apk add --no-cache \
+RUN set -ex && \
+    apk add --no-cache \
         bash \
+        tini \
+        linux-pam \
         procps \
         coreutils \
-        python2 \
-        python3 \
         libc6-compat \
         snappy \
         zlib \
         && mkdir -p /opt && \
    wget -qO- http://apache.rediris.es/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop2.7.tgz | tar xvz -C /opt && \
-   ln -s /opt/spark-$SPARK_VERSION-bin-hadoop2.7 /opt/spark
+   ln -s /opt/spark-$SPARK_VERSION-bin-hadoop2.7 /opt/spark && \
+   mkdir -p /opt/spark/work-dir && \
+   mkdir -p /opt/spark/worker && \
+   touch /opt/spark/RELEASE && \
+   rm /bin/sh && \
+   ln -sv /bin/bash /bin/sh && \
+   echo "auth required pam_wheel.so use_uid" >> /etc/pam.d/su && \
+   chgrp root /etc/passwd && chmod ug+rw /etc/passwd && \
+   cp /opt/spark/kubernetes/dockerfiles/spark/entrypoint.sh /opt/entrypoint.sh && \
+   ln -s /opt/spark/kubernetes/tests /opt/spark/tests
 
-# ADDING SPARKR SUPPORT
-RUN apk add --no-cache R
 # ADDING KAFKA LIBRARIES
 RUN wget http://central.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.11/$SPARK_VERSION/spark-sql-kafka-0-10_2.11-$SPARK_VERSION.jar \
 -O /opt/spark/jars/spark-sql-kafka-0-10_2.11-$SPARK_VERSION.jar && \
 wget http://central.maven.org/maven2/org/apache/kafka/kafka-clients/1.0.0/kafka-clients-1.0.0.jar \
 -O /opt/spark/jars/kafka-clients-1.0.0.jar
 
-# You may improve spark access to fs if this paths are mounted as volumes
-ENV SPARK_LOCAL_DIRS=$SPARK_HOME/local
-ENV SPARK_WORKER_DIR=$SPARK_HOME/work
 
+WORKDIR $SPARK_HOME/local
 
-COPY entrypoint.sh /
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["--help"]
+COPY standalone /opt/spark/sbin/standalone
+
+ENTRYPOINT [ "/opt/entrypoint.sh" ]
+
 
