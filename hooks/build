@@ -1,8 +1,8 @@
 #!/bin/bash
 set -ex
-if [ "$CACHE_TAG" = "latest" ];
+if [ "$DOCKER_TAG" = "latest" ];
 then
   docker build --build-arg version=$LATEST_VERSION
 else
-  docker build --build-arg version=$CACHE_TAG -f $DOCKERFILE_PATH -t $IMAGE_NAME .
+  docker build --build-arg version=$DOCKER_TAG -f $DOCKERFILE_PATH -t $IMAGE_NAME .
 fi
