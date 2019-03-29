@@ -2,12 +2,13 @@ ARG version
 FROM gradiant/spark:$version
 
 # ADDING PYSPARK SUPPORT
-RUN apk add --no-cache python3 py3-numpy && \
+RUN apk add --no-cache python3 && \
     python3 -m pip install --no-cache-dir --upgrade pip setuptools
 # ADDING PYARROW SUPPORT
 # install pyarrow for efficient pandas dataframe <-> spark dataframe
-COPY  libarrow-alpine.tgz  pyarrow-0.12.1a0-py3.6-linux-x86_64.egg /
-RUN cd / && tar -xvzf libarrow-alpine.tgz && \
-    easy_install /pyarrow-0.12.1a0-py3.6-linux-x86_64.egg
+COPY  alpine-libarrow/ /
+RUN apk add --no-cache py3-numpy boost && \
+    easy_install /pyarrow-0.12.1a0-py3.6-linux-x86_64.egg && \
+    rm /pyarrow-0.12.1a0-py3.6-linux-x86_64.egg
 
 ENV PYTHONPATH ${SPARK_HOME}/python/lib/pyspark.zip:${SPARK_HOME}/python/lib/py4j-*.zip
