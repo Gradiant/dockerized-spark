@@ -91,6 +91,7 @@ Example of submiting a spark job to a kubernetes cluster with the gradiant/spark
 - A kubernetes cluster (tested on kubernetes 1.11.8)
 
 - Setting up a kubernetes serviceaccount with permissions to create pods and services:
+
 ```
 kubectl create serviceaccount spark
 kubectl create rolebinding spark-role --clusterrole=edit --serviceaccount=default:spark --namespace=default
@@ -113,18 +114,18 @@ docker run --rm -ti --net host gradiant/spark:2.4.0 spark-submit \
     --class org.apache.spark.examples.SparkPi \
     --conf spark.executor.instances=2 \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-    --conf spark.kubernetes.container.image=gradiant/spark:2.4.0-k8s \
+    --conf spark.kubernetes.container.image=gradiant/spark:2.4.0 \
     --conf spark.kubernetes.executor.request.cores=0.2 \
     --executor-memory 500M \
     $SPARK_HOME/examples/jars/spark-examples_2.11-2.4.0.jar 100
    ```
 We can check the driver pod of the pi application is deployed in kubernetes dashboard:
 
-![driver pod](images/spark-kubernetes.png)
+![driver pod](https://github.com/Gradiant/dockerized-spark/blob/master/images/spark-kubernetes.png)
 
 We can check the log at the driver pod output:
 
-![driver pod_logs](images/driver-pod-logs.png)
+![driver pod_logs](https://github.com/Gradiant/dockerized-spark/blob/master/images/driver-pod-logs.png)
 
 *Note: the previous spark-submit configuration is set up for testing*
 
