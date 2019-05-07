@@ -40,7 +40,7 @@ RUN cp -r /opt/hadoop-src/hadoop-hdfs-project/hadoop-hdfs/target/native/target/u
 
 
 FROM alpine:edge
-ARG version=2.4.1
+ARG version=2.4.2
 
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
 LABEL organization="gradiant.org"

@@ -1,4 +1,4 @@
-ARG version=2.4.1
+ARG version=2.4.2
 
 FROM gradiant/spark:$version
 
