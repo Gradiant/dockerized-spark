@@ -1,4 +1,5 @@
-ARG version
+ARG version=2.4.1
+
 FROM gradiant/spark:$version
 
 # ADDING SPARKR SUPPORT

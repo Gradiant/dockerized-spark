@@ -1,3 +1,5 @@
+ARG version=2.4.1
+
 FROM alpine:edge as arrow-builder
 
 LABEL maintainer="cgiraldo@gradiant.org"
@@ -40,9 +42,7 @@ RUN cd /opt/arrow/python && \
 RUN mkdir -p /opt/dist/python && cp /opt/arrow/python/dist/* /opt/dist/python
 
 
-
-ARG version=2.4.0
-FROM gradiant/spark:2.4.0
+FROM gradiant/spark:$version
 
 # ADDING PYSPARK SUPPORT
 RUN apk add --no-cache python3 && \
