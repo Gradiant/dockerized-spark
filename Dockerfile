@@ -1,12 +1,13 @@
-FROM openjdk:8u171-jdk-alpine3.8 as hadoop-builder
+FROM alpine:edge as hadoop-builder
 
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
 LABEL organization="gradiant.org"
 
 ARG hadoop_version=2.7.7
-ENV HADOOP_VERSION=$hadoop_version
+ENV HADOOP_VERSION=$hadoop_version \
+    JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk
 
-RUN apk add --no-cache bash  build-base maven autoconf automake libtool cmake zlib-dev libressl-dev fts-dev  libtirpc-dev && mkdir /opt
+RUN apk add --no-cache bash openjdk8 build-base maven autoconf automake libtool cmake zlib-dev libressl-dev fts-dev  libtirpc-dev && mkdir -p /opt
 # Building Protobuf 2.5.0
 RUN cd /opt && wget https://github.com/google/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz && \
   tar xvf protobuf-2.5.0.tar.gz && cd protobuf-2.5.0 && ./autogen.sh && ./configure --prefix=/usr && \
@@ -38,13 +39,15 @@ RUN cp -r /opt/hadoop-src/hadoop-common-project/hadoop-common/target/native/targ
 RUN cp -r /opt/hadoop-src/hadoop-hdfs-project/hadoop-hdfs/target/native/target/usr/local/lib/* /opt/hadoop-native/
 
 
-FROM openjdk:8u171-jre-alpine3.8
-ARG version
+FROM alpine:edge
+ARG version=2.4.0
+
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
 LABEL organization="gradiant.org"
 ENV SPARK_VERSION=$version \
     SPARK_HOME=/opt/spark \
-    SPARK_NO_DAEMONIZE=true
+    SPARK_NO_DAEMONIZE=true \
+    JAVA_HOME=/usr/lib/jvm/java-1.8-openjdk/jre
 ENV PATH=$PATH:$SPARK_HOME/sbin:$SPARK_HOME/bin \
     SPARK_LOCAL_DIRS=$SPARK_HOME/work-dir \
     SPARK_WORKER_DIR=$SPARK_HOME/worker
@@ -60,10 +63,11 @@ RUN set -ex && \
         procps \
         coreutils \
         libc6-compat \
+        openjdk8-jre \
         snappy \
         zlib \
         && mkdir -p /opt && \
-   wget -qO- http://apache.rediris.es/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop2.7.tgz | tar xvz -C /opt && \
+   wget -qO- https://archive.apache.org/dist/spark/spark-$SPARK_VERSION/spark-$SPARK_VERSION-bin-hadoop2.7.tgz | tar xvz -C /opt && \
    ln -s /opt/spark-$SPARK_VERSION-bin-hadoop2.7 /opt/spark && \
    mkdir -p /opt/spark/work-dir && \
    mkdir -p /opt/spark/worker && \
@@ -78,8 +82,8 @@ RUN set -ex && \
 # ADDING KAFKA LIBRARIES
 RUN wget http://central.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.11/$SPARK_VERSION/spark-sql-kafka-0-10_2.11-$SPARK_VERSION.jar \
 -O /opt/spark/jars/spark-sql-kafka-0-10_2.11-$SPARK_VERSION.jar && \
-wget http://central.maven.org/maven2/org/apache/kafka/kafka-clients/1.0.0/kafka-clients-1.0.0.jar \
--O /opt/spark/jars/kafka-clients-1.0.0.jar
+wget http://central.maven.org/maven2/org/apache/kafka/kafka-clients/2.0.0/kafka-clients-2.0.0.jar \
+-O /opt/spark/jars/kafka-clients-2.0.0.jar
 
 
 WORKDIR $SPARK_HOME/local
