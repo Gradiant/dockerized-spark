@@ -1,4 +1,4 @@
-ARG version=2.4.2
+ARG version=2.3.3
 
 FROM alpine:edge as arrow-builder
 
