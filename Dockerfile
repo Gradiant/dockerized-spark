@@ -80,8 +80,8 @@ RUN set -ex && \
    ln -s /opt/spark/kubernetes/tests /opt/spark/tests
 
 # ADDING KAFKA LIBRARIES
-RUN wget http://central.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.11/$SPARK_VERSION/spark-sql-kafka-0-10_2.11-$SPARK_VERSION.jar \
--O /opt/spark/jars/spark-sql-kafka-0-10_2.11-$SPARK_VERSION.jar && \
+RUN wget http://central.maven.org/maven2/org/apache/spark/spark-sql-kafka-0-10_2.12/$SPARK_VERSION/spark-sql-kafka-0-10_2.12-$SPARK_VERSION.jar \
+-O /opt/spark/jars/spark-sql-kafka-0-10_2.12-$SPARK_VERSION.jar && \
 wget http://central.maven.org/maven2/org/apache/kafka/kafka-clients/2.0.0/kafka-clients-2.0.0.jar \
 -O /opt/spark/jars/kafka-clients-2.0.0.jar
 
