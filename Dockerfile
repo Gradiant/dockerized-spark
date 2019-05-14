@@ -56,6 +56,7 @@ ENV PATH=$PATH:$SPARK_HOME/sbin:$SPARK_HOME/bin \
 COPY --from=hadoop-builder /opt/hadoop-native/* /lib/
 
 RUN set -ex && \
+    ln -s /lib /lib64 && \
     apk add --no-cache \
         bash \
         tini \
