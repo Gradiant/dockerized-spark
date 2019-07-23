@@ -1,4 +1,4 @@
-FROM alpine:edge as hadoop-builder
+FROM alpine:latest as hadoop-builder
 
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
 LABEL organization="gradiant.org"
@@ -39,7 +39,7 @@ RUN cp -r /opt/hadoop-src/hadoop-common-project/hadoop-common/target/native/targ
 RUN cp -r /opt/hadoop-src/hadoop-hdfs-project/hadoop-hdfs/target/native/target/usr/local/lib/* /opt/hadoop-native/
 
 
-FROM alpine:edge
+FROM alpine:latest
 ARG version=2.4.2
 
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
@@ -54,6 +54,7 @@ ENV PATH=$PATH:$SPARK_HOME/sbin:$SPARK_HOME/bin \
 # You may improve spark access to fs if SPARK_LOCAL_DIRS and SPARK_WORKER_DIR are mounted as volumes
 
 COPY --from=hadoop-builder /opt/hadoop-native/* /lib/
+
 
 RUN set -ex && \
     ln -s /lib /lib64 && \

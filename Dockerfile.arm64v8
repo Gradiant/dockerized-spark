@@ -1,4 +1,4 @@
-FROM arm64v8/alpine:edge as hadoop-builder
+FROM arm64v8/alpine:latest as hadoop-builder
 
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
 LABEL organization="gradiant.org"
@@ -46,7 +46,7 @@ RUN cp -r /opt/hadoop-src/hadoop-common-project/hadoop-common/target/native/targ
 RUN cp -r /opt/hadoop-src/hadoop-hdfs-project/hadoop-hdfs/target/native/target/usr/local/lib/* /opt/hadoop-native/
 
 
-FROM arm64v8/alpine:edge
+FROM arm64v8/alpine:latest
 
 LABEL maintainer="Carlos Giraldo <cgiraldo@gradiant.org>"
 LABEL organization="gradiant.org"

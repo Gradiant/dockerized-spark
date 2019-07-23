@@ -1,6 +1,6 @@
 ARG version=2.4.2
 
-FROM alpine:edge as arrow-builder
+FROM alpine:latest as arrow-builder
 
 LABEL maintainer="cgiraldo@gradiant.org"
 LABEL organization="gradiant.org"
@@ -53,8 +53,10 @@ RUN apk add --no-cache python3 && \
 # ADDING PYARROW SUPPORT
 # install pyarrow for efficient pandas dataframe <-> spark dataframe
 COPY  --from=arrow-builder /opt/dist/ /usr/
-RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
-    apk add --no-cache py3-numpy py3-pandas boost-regex boost-filesystem boost-system && \
+
+#Enable testing repo for py-pandas and py-scikit-learn packages
+RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+    apk add --no-cache py3-numpy py3-pandas@testing py3-scikit-learn@testing boost-regex boost-filesystem boost-system && \
     easy_install /usr/python/pyarrow-0.13.0-py3.7-linux-x86_64.egg
 
 
