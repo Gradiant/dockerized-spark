@@ -1,0 +1,60 @@
+ARG version=2.4.4
+
+FROM alpine:latest as arrow-builder
+
+LABEL maintainer="cgiraldo@gradiant.org"
+LABEL organization="gradiant.org"
+
+## Adding apache arrow build dependencies
+RUN apk add --no-cache build-base bash cmake boost-dev py3-numpy py-numpy-dev python3-dev autoconf zlib-dev flex bison
+RUN pip3 install cython
+## Downloading and building arrow source
+RUN wget -qO- https://github.com/apache/arrow/archive/apache-arrow-0.14.0.tar.gz | tar xvz -C /opt
+RUN ln -s /opt/arrow-apache-arrow-0.14.0 /opt/arrow 
+
+ENV ARROW_BUILD_TYPE=release \
+    ARROW_HOME=/opt/dist \
+    PARQUET_HOME=/opt/dist
+
+RUN /bin/bash
+RUN mkdir /opt/dist
+RUN mkdir -p /opt/arrow/cpp/build 
+RUN cd /opt/arrow/cpp/build  && \
+    cmake -DCMAKE_BUILD_TYPE=$ARROW_BUILD_TYPE \
+      -DCMAKE_INSTALL_PREFIX=$ARROW_HOME \
+      -DCMAKE_INSTALL_LIBDIR=lib \
+      -DARROW_PARQUET=on \
+      -DARROW_PYTHON=on \
+      -DARROW_PLASMA=on \
+      -DARROW_BUILD_TESTS=OFF \
+      -DPYTHON_EXECUTABLE=/usr/bin/python3 \
+      .. && \
+    make -j4 && \
+    make install
+
+#build pyarrow
+RUN cp -r /opt/dist/* /
+RUN cd /opt/arrow/python && \
+    python3 setup.py build_ext --build-type=$ARROW_BUILD_TYPE \
+       --with-parquet --with-plasma --inplace
+RUN cd /opt/arrow/python && \
+    python3 setup.py bdist_egg
+RUN mkdir -p /opt/dist/python && cp /opt/arrow/python/dist/* /opt/dist/python
+
+
+FROM gradiant/spark:$version-minimum-alpine
+
+# ADDING PYSPARK SUPPORT
+ENV PYTHONPATH ${SPARK_HOME}/python/lib/pyspark.zip:${SPARK_HOME}/python/lib/py4j-src.zip
+RUN apk add --no-cache python3 && \
+    python3 -m pip install --no-cache-dir --upgrade pip setuptools && \
+    # Make image independent of the py4j number version provided by spark
+    ln -s $SPARK_HOME/python/lib/py4j-*-src.zip $SPARK_HOME/python/lib/py4j-src.zip
+# ADDING PYARROW SUPPORT
+# install pyarrow for efficient pandas dataframe <-> spark dataframe
+COPY  --from=arrow-builder /opt/dist/ /usr/
+RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
+    apk add --no-cache py3-numpy py3-pandas boost-regex boost-filesystem boost-system && \
+    easy_install /usr/python/pyarrow-0.14.0-py3.7-linux-x86_64.egg
+
+

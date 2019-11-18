@@ -1,6 +1,6 @@
 ARG version=2.4.4
 
-FROM gradiant/spark:$version-python
+FROM gradiant/spark:$version-python-alpine
 
 #############################
 # ADDING KAFKA CLIENT LIBRARIES
@@ -14,12 +14,7 @@ wget http://central.maven.org/maven2/org/apache/kafka/kafka-clients/2.0.0/kafka-
 # ADDING R SUPPORT
 #############################
 # ADDING SPARKR SUPPORT
-apt-get update && \
-    apt-get install -y \
-            R \
-            R-dev \
-            && rm -rf /var/lib/apt/lists/* && \
-
+RUN apk add --no-cache R R-dev
 ENV R_HOME /usr/lib/R
 
 WORKDIR $SPARK_HOME/local
@@ -27,3 +22,5 @@ WORKDIR $SPARK_HOME/local
 COPY standalone /opt/spark/sbin/standalone
 
 ENTRYPOINT [ "/opt/entrypoint.sh" ]
+
+
