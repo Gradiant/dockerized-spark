@@ -40,6 +40,9 @@ RUN apt-get update && \
     cp /opt/spark/kubernetes/dockerfiles/spark/entrypoint.sh /opt/entrypoint.sh && \
     ln -s /opt/spark/kubernetes/tests /opt/spark/tests
 
+# upgrading kubernetes-client.jar to 4.4.2 to FIX BUG https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/issues/591
+RUN rm $SPARK_HOME/jars/kubernetes-client-3.0.0.jar
+ADD https://repo1.maven.org/maven2/io/fabric8/kubernetes-client/4.4.2/kubernetes-client-4.4.2.jar $SPARK_HOME/jars
 
 WORKDIR $SPARK_HOME/local
 
