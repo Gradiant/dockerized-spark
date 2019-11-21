@@ -41,8 +41,12 @@ RUN set -ex && \
    ln -s /opt/spark/kubernetes/tests /opt/spark/tests
 
 # upgrading kubernetes-client.jar to 4.4.2 to FIX BUG https://github.com/GoogleCloudPlatform/spark-on-k8s-operator/issues/591
-RUN rm $SPARK_HOME/jars/kubernetes-client-3.0.0.jar
+RUN rm $SPARK_HOME/jars/kubernetes-client-4.1.2.jar
 ADD https://repo1.maven.org/maven2/io/fabric8/kubernetes-client/4.4.2/kubernetes-client-4.4.2.jar $SPARK_HOME/jars
+
+ADD https://repo1.maven.org/maven2/org/apache/spark/spark-avro_2.11/$SPARK_VERSION/spark-avro_2.11-$SPARK_VERSION.jar $SPARK_HOME/jars
+
+RUN cp $SPARK_HOME/examples/jars/spark-examples_2.11-$SPARK_VERSION.jar $SPARK_HOME/jars/
 
 WORKDIR $SPARK_HOME/local
 
