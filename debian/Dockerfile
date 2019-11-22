@@ -14,11 +14,11 @@ wget http://central.maven.org/maven2/org/apache/kafka/kafka-clients/2.0.0/kafka-
 # ADDING R SUPPORT
 #############################
 # ADDING SPARKR SUPPORT
-apt-get update && \
+RUN apt-get update && \
     apt-get install -y \
-            R \
-            R-dev \
-            && rm -rf /var/lib/apt/lists/* && \
+            r-base \
+            r-base-dev \
+            && rm -rf /var/lib/apt/lists/*
 
 ENV R_HOME /usr/lib/R
 
