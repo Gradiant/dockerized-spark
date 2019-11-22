@@ -42,7 +42,7 @@ RUN cd /opt/arrow/python && \
 RUN mkdir -p /opt/dist/python && cp /opt/arrow/python/dist/* /opt/dist/python
 
 
-FROM gradiant/spark:$version-minimum-alpine
+FROM gradiant/spark:$version-alpine
 
 # ADDING PYSPARK SUPPORT
 ENV PYTHONPATH ${SPARK_HOME}/python/lib/pyspark.zip:${SPARK_HOME}/python/lib/py4j-src.zip
@@ -54,7 +54,7 @@ RUN apk add --no-cache python3 && \
 # install pyarrow for efficient pandas dataframe <-> spark dataframe
 COPY  --from=arrow-builder /opt/dist/ /usr/
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories && \
-    apk add --no-cache py3-numpy py3-pandas boost-regex boost-filesystem boost-system && \
+    apk add --no-cache py3-numpy py3-pandas py3-scikit-learn boost-regex boost-filesystem boost-system && \
     easy_install /usr/python/pyarrow-0.14.0-py3.7-linux-x86_64.egg
 
 

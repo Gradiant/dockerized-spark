@@ -2,10 +2,14 @@ This is a docker image of [Apache Spark](https://spark.apache.org/).
 
 ## Properties
 
-- This image has a small footprint ( base docker image is openjdk:8u171-jre-alpine3.8).
-- This image has Kafka libraries included.
-- There is a derived image with pyspark support gradiant/spark:2.4.0-python
-- There is a derived image with sparkR support gradiant/spark:2.4.0-R
+This repo provides debian-based docker images and alpine-based docker images (-alpine suffix tag) for a small footprint.
+
+The image provides a spark distribution with basic libraries.
+
+There are also the following image variants:
+- python: support for pyspark + numpy + pandas + scikit-learn + pyarrow.
+- R: support for sparkR.
+- all: spport for pyspark + sparkR + several libraries.
 
 ## Howto
 The image can be used to run spark in serveral ways:
@@ -19,9 +23,9 @@ The image can be used to run spark in serveral ways:
 Example of running a spark job in the container's local spark. 
 
 ```
-docker run -ti gradiant/spark:2.4.0 spark-submit \
-  --master spark://spark-master:7077local[*] \
-  --class org.apache.spark.examples.SparkPi $SPARK_HOME/examples/jars/spark-examples_2.11-2.4.0.jar 100
+docker run -ti gradiant/spark:latest-alpine spark-submit \
+  --master local[*] \
+  --class org.apache.spark.examples.SparkPi $SPARK_HOME/examples/jars/spark-examples_*.jar 100
 ```
 
 ## Spark Standalone 
@@ -31,7 +35,7 @@ docker run -ti gradiant/spark:2.4.0 spark-submit \
 run container with `standalone master` as command.
 
 ``` 
-docker run -d gradiant/spark standalone master
+docker run -d gradiant/spark:latest-alpine standalone master
 ```
 
 Optional configuration is through environment variables:
@@ -45,7 +49,7 @@ Optional configuration is through environment variables:
 run container with `standalone worker <master_url>` as command. 
 
 ```
-docker run -d gradiant/spark standalone worker <master_url> [options]
+docker run -d gradiant/spark:latest-alpine standalone worker <master_url> [options]
 Master must be a URL of the form spark://hostname:port.
 Options:
   -c CORES, --cores CORES  Number of cores to use
@@ -66,16 +70,16 @@ Example of a local spark standalone deployment with a spark master and three spa
 
 ```
 docker network create sparknet
-docker run -d -p 8080:8080 --name spadockerrk-master gradiant/spark standalone master
-docker run -d --net sparknet --name spark-worker1 gradiant/spark:2.4.0 standalone worker spark://spark-master:7077
-docker run -d --net sparknet --name spark-worker2 gradiant/spark:2.4.0 standalone worker spark://spark-master:7077
-docker run -d --net sparknet --name spark-worker3 gradiant/spark:2.4.0 standalone worker spark://spark-master:7077
+docker run -d -p 8080:8080 --name spadockerrk-master gradiant/spark:latest-alpine standalone master
+docker run -d --net sparknet --name spark-worker1 gradiant/spark:latest-alpine standalone worker spark://spark-master:7077
+docker run -d --net sparknet --name spark-worker2 gradiant/spark:latest-alpine standalone worker spark://spark-master:7077
+docker run -d --net sparknet --name spark-worker3 gradiant/spark:latest-alpine standalone worker spark://spark-master:7077
 ```
 ## Spark Client
 Example of running a container as spark client to submit a job to the previous standalone spark:
 
 ```
-docker run -ti --net sparknet --rm gradiant/spark:2.4.0 spark-submit \
+docker run -ti --net sparknet --rm gradiant/spark:latest-alpine spark-submit \
   --master spark://spark-master:7077 \
   --class org.apache.spark.examples.SparkPi $SPARK_HOME/examples/jars/spark-examples_2.11-2.4.0.jar 100
 ```
@@ -84,7 +88,7 @@ docker run -ti --net sparknet --rm gradiant/spark:2.4.0 spark-submit \
 
 [Official documentation](https://spark.apache.org/docs/latest/running-on-kubernetes.html)
 
-Example of submiting a spark job to a kubernetes cluster with the gradiant/spark:2.4.0 docker image.
+Example of submiting a spark job to a kubernetes cluster with the gradiant/spark:latest-alpine docker image.
 
 ### Prerequisites
 
@@ -107,17 +111,17 @@ Now kubernetes API is accessible at http://127.0.0.1:8001
 
 We run a container as spark client and point to the kubernetes API as spark scheduler: 
 ```
-docker run --rm -ti --net host gradiant/spark:2.4.0 spark-submit \
+docker run --rm -ti --net host gradiant/spark:latest-alpine spark-submit \
     --master k8s://http://127.0.0.1:8001 \
     --deploy-mode cluster \
     --name spark-pi \
     --class org.apache.spark.examples.SparkPi \
     --conf spark.executor.instances=2 \
     --conf spark.kubernetes.authenticate.driver.serviceAccountName=spark \
-    --conf spark.kubernetes.container.image=gradiant/spark:2.4.0 \
+    --conf spark.kubernetes.container.image=gradiant/spark:latest-alpine \
     --conf spark.kubernetes.executor.request.cores=0.2 \
     --executor-memory 500M \
-    $SPARK_HOME/examples/jars/spark-examples_2.11-2.4.0.jar 100
+    $SPARK_HOME/examples/jars/spark-examples_*.jar 100
    ```
 We can check the driver pod of the pi application is deployed in kubernetes dashboard:
 
