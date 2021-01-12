@@ -1,3 +1,12 @@
+**Deprecation Notice**
+
+This repository was our contribution to create a Spark container image when there were not good alternatives.
+
+Now there are good supported alternative such as the [Spark bitnami image](https://hub.docker.com/r/bitnami/spark), so we no longer support this repo.
+
+
+
+
 This is a docker image of [Apache Spark](https://spark.apache.org/).
 
 ## Properties
